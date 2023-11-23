@@ -1,6 +1,6 @@
 {
   "name": "occupancymanager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Occupany Manager for openHAB using semantic locations and point items to determine occupancy status.",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://https://github.com/mjcumming/OpenHAB-4-Occupancy-Manager.git#main"
+    "url": "git+https://github.com/mjcumming/OpenHAB-4-Occupancy-Manager.git#main"
   },
   "author": "Michael Cumming",
   "bugs": {
