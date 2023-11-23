@@ -20,10 +20,6 @@ In the realm of home automation, determining whether a specific location within 
 - **Hierarchical Location Structure**: Supports complex control and event propagation across different levels, from individual locations to the entire home.  
 - **Ease of Use**: Encapsulates all necessary logic within the module, shifting the focus from coding to configuring, thereby making occupancy management more accessible.
 
-## Target Audience  
-
-The Occupancy Manager is ideal for homeowners, hobbyists, and professional integrators using OpenHAB 4 for home automation. It is especially valuable for those looking to implement advanced, occupancy-based automation in a user-friendly manner.
-
 ## Installation
 
 Installing the Occupancy Manager module is a quick process. Follow these instructions to get started:
@@ -256,8 +252,6 @@ Here, the motion sensor in the bathroom:
 
 This detailed section on item configuration provides a comprehensive guide on how to set up individual items for occupancy detection and management within the Occupancy Manager module.
 
-## The code snippet you've provided reveals that the Occupancy Manager module creates several specific items for each location to manage and reflect its occupancy state. Let's break down the purpose and usage of these items:  
-
 ### Occupancy Manager Generated Items for Each Location  
 
 For each location, the Occupancy Manager module creates specific items named using the location item's name with added suffixes. These items manage and reflect the occupancy state and control aspects of the location.  
@@ -271,7 +265,7 @@ For each location, the Occupancy Manager module creates specific items named usi
 **Occupancy Control Item (_Occupancy_Control):**   
 
 - Purpose: Provides control over the locking of the location's occupancy status from rules.
-- State: String value indicating control commands (e.g., `LOCK`, `UNLOCK`, `CLEARLOCKS`).  
+- State: String value indicating control commands (e.g., `LOCK`, `UNLOCK`, `CLEARLOCK`).  
 - Usage: Receives commands to lock or unlock the location. Locking controls can be propagated to child locations for hierarchical occupancy management.  
 
 **Occupancy Locking Item (_Occupancy_Lock):**  
@@ -294,4 +288,36 @@ For each location, the Occupancy Manager module creates specific items named usi
 
 **UI Display:** These items can be displayed in the OpenHAB user interface, providing users with an at-a-glance view of which locations are occupied, locked, or their upcoming vacancy status.  
 
-These generated items add significant flexibility and control to the Occupancy Manager, enabling deep integration of occupancy-based automation within the OpenHAB setup.
+### Detailed Discussion on Locking Mechanism
+The Occupancy Manager module provides a locking mechanism to override and take manual control over the automatic occupancy detection in certain scenarios.
+
+**Introduction to Locking**
+The locking feature allows temporarily preventing occupancy state changes to a location that would normally occur from sensor events. Locking is useful when:
+
+You don't want any automation changes in the house for a period.
+The house is vacant but you want to manually control devices without triggering occupancy.
+Overriding inaccurate occupancy detection during special activities.
+Locking provides a way to manually override the automated occupancy status management when required.
+
+**Using Locking in the Occupancy Manager**
+The module provides a _Occupancy_Control item for each location to command locking actions.
+
+**Locking Commands**
+
+LOCK: Prevents occupancy status from changing automatically due to sensor events. Multiple LOCK commands can be sent.
+UNLOCK: Removes one of the locks, returning to normal automated occupancy update after all UNLOCKs clear all previous LOCKs.
+CLEARLOCK: Clears all existing locks on a location regardless of number of LOCK commands sent previously.
+Locks do not propagate to parent or child locations.
+
+If a location is occupied when lock is applied, the occupancy timer is suspended until lock is cleared.
+
+A parent location cannot be marked vacant if any child location is locked.
+
+**Example Usage**
+
+If away on vacation with the house vacant, but you want to turn on some lights for security purposes without marking the home as occupied:
+
+Send LOCK command to _Occupancy_Control item for the home location group.
+Manually turn lights on by setting state of light switches.
+This will not trigger occupancy as home location is locked.
+Locking provides added flexibility in managing occupancy status for complex home automation needs.
