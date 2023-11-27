@@ -94,7 +94,7 @@ When the motion sensor is triggered, the bathroom will become occupied. The ligh
 
 #### Configuring Occupancy Items  
 
-Items like light switches or motion sensors are grouped in location and events from these items are used to determine occupancy.
+Items like light switches or motion sensors are grouped in location, and events from these items are used to determine occupancy.
 
 **Steps to Configure an Occupancy Item:**
 
@@ -206,8 +206,8 @@ Item metadata in the Occupancy Manager module dictates how the state changes of 
 
 - Description: Specifies the type of occupancy event the item generates.  
 - Options:
-    - `OnOff`: An item (like a light switch) triggers an occupancy event when turned on.  
-    - `ContactMotion`: A motion sensor triggers an occupancy event when motion is detected.
+    - `OnOff`: An item (like a light switch or dimmer) triggers an occupancy event when turned on.  
+    - `ContactMotion`: A motion sensor triggers an occupancy event when motion is detected. 
     - `ContactDoor`: A door sensor triggers an occupancy event when opened and affects the occupancy status until it is closed.
     - `AnyChange`: Any change in the item's state triggers an occupancy event.
 - Example: `OccupancyEvent = "OnOff"` for a light switch means that turning on the light indicates occupancy.
