@@ -2,12 +2,6 @@
 const { LocationManager } = require('./locations/locationManager.js');
 
 /**
- * Starts the Location Manager
- * 
- * @class
- * @property {LocationManager} locationManager - The Location Manager instance.
- */
-/**
  * The Occupancy Manager class is used to start the Location Manager.
  * @class
  */
