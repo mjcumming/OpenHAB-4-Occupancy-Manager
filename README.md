@@ -3,22 +3,22 @@
 
 ## Introduction
 
-Welcome to the Occupancy Manager module, an advanced tool designed for the OpenHAB 4 platform. This module is engineered to transform home automation with a nuanced approach to location-based occupancy management and automation.
+Welcome to the Occupancy Manager module, a location-based occupancy management and automation tool for OpenHAB based on the semantic model.
 
 ## Purpose
 
-In the realm of home automation, determining whether a specific location within the home is occupied is crucial. The Occupancy Manager module for OpenHAB 4 simplifies this by utilizing OpenHAB's semantic model, offering a refined system for managing locations and tracking their occupancy in real-time. The module operates on two core components:
+In the realm of home automation, determining whether a specific location within the home is occupied is crucial. The Occupancy Manager module for OpenHAB 4 simplifies this by utilizing OpenHAB's semantic model, offering a refined system for managing locations and tracking their occupancy. The module operates on two core components:
 
-- **Occupancy Status Determination**: Using events from existing devices (like light switches, AV systems, and motion sensors) to dynamically track the occupancy status of locations, thereby eliminating the need for dedicated presence sensors in every location.  
+- **Occupancy Status Determination**: Using events from existing devices (like light switches, AV systems, and motion sensors) to dynamically track the occupancy status of locations, eliminating the need for dedicated presence sensors in every location.  
 - **Optional Event-Driven Automation**: If desired, the module can automate tasks based on the occupancy state, such as adjusting lighting, HVAC systems, and media devices to enhance comfort and energy efficiency.
 
 ## Key Features
 
-- **Semantic Location Management**: Manages locations within a home intelligently and semantically, recognizing and categorizing various locations such as rooms and floors.
-- **Dynamic Occupancy Tracking**: Determines the occupancy status of locations using events from existing devices, making the system both economical and adaptable. 
-- **Automated and Manual Control**: Offers both automated actions based on occupancy states and the ability for users to manually control actions using generated items in each location. This allows users to choose between automated tasks or custom rule-based automation.
-- **Hierarchical Location Structure**: Supports complex control and event propagation across different levels, from individual locations to the entire home.  
-- **Ease of Use**: Encapsulates all necessary logic within the module, shifting the focus from coding to configuring, thereby making occupancy management more accessible.
+- **Semantic Location Management**: Uses the semantic model to determine locations to monitor occupancy.
+- **Dynamic Occupancy Tracking**: Determines the occupancy status of locations using events from existing devices. 
+- **Automated and Manual Control**: Offers both automated actions based on occupancy states and users' ability to control actions using generated items in each location manually. This allows users to choose between automated tasks or custom rule-based automation.
+- **Hierarchical Location Structure**: Supports event propagation across different locations, from individual locations to the entire home.  
+- **Ease of Use**: Encapsulates all necessary logic within the module, shifting the focus from coding to configuring, making occupancy management easy.
 
 ## Installation
 
@@ -34,15 +34,15 @@ Installing the Occupancy Manager module is a quick process. Follow these instruc
     npm install occupancymanager
     ```
 
-    This command installs the Occupancy Manager module along with its dependencies into your OpenHAB system.
+    This command installs the Occupancy Manager module and its dependencies into your OpenHAB system.
 
 ## Configuration of the Occupancy Manager Module  
 
-The configuration of the Occupancy Manager module is essential for its effective operation within your OpenHAB 4 environment. This section guides you through defining locations, setting up metadata, and configuring items for occupancy detection.
+TThis section guides you through defining locations, setting up metadata, and configuring items for occupancy detection.
 
 ### Basic Configuration Overview
 
-Configuration involves defining locations, setting up location-specific metadata, and configuring items (like switches or sensors) that influence occupancy status. Accurate configuration ensures the module reflects the real occupancy status and integrates seamlessly with your home automation system.
+Configuration involves defining locations, setting up location-specific metadata, and configuring items (like switches or sensors) influencing occupancy status. Accurate configuration ensures the module reflects the occupancy status and integrates seamlessly with your home automation system.
 
 #### Defining Locations
 
@@ -83,11 +83,18 @@ Group gBathroom "Bathroom" <icon> (gFirstFloor) ["Bathroom"] {
 }
 ```
 
-In this example, the bathroom's occupancy time is set to 15 minutes. Lights and exhaust fans turn off when it becomes vacant and lights turn on when occupied.
+In this example, the bathroom's occupancy time is 15 minutes when an item in that location generates an event. If there is a motion sensor in the bathroom that is configured to generate an occupancy event:
+
+```text  
+Contact Bathroom_Motion_Sensor "Bathroom Motion" (gBathroom) ["Motion"] { 
+    OccupancyEvent = "Contact" 
+}
+```
+When the motion sensor is triggered, the bathroom will become occupied. The lights will automatically turn on. Any further motion events will reset the occupancy timer for another 15 minutes. After 15 minutes of no events, the location will be vacant, and the lights and exhaust fans will be turned off.
 
 #### Configuring Occupancy Items  
 
-Items such as light switches or motion sensors are linked to locations to determine their occupancy.
+Items like light switches or motion sensors are grouped in location, and events from these items are used to determine occupancy.
 
 **Steps to Configure an Occupancy Item:**
 
@@ -102,7 +109,7 @@ Switch LightSwitch_Bathroom "Bathroom Light" (gBathroom) ["Lighting"] {
 }
 ```
 
-The bathroom light switch here influences the occupancy status of the bathroom.
+The bathroom light switch here influences the occupancy status of the bathroom. It will generate an occupancy event when the switch is turned on.
 
 ### Advanced Location Hierarchy and Event Propagation  
 
@@ -199,8 +206,8 @@ Item metadata in the Occupancy Manager module dictates how the state changes of 
 
 - Description: Specifies the type of occupancy event the item generates.  
 - Options:
-    - `OnOff`: An item (like a light switch) triggers an occupancy event when turned on.  
-    - `ContactMotion`: A motion sensor triggers an occupancy event when motion is detected.
+    - `OnOff`: An item (like a light switch or dimmer) triggers an occupancy event when turned on.  
+    - `ContactMotion`: A motion sensor triggers an occupancy event when motion is detected. 
     - `ContactDoor`: A door sensor triggers an occupancy event when opened and affects the occupancy status until it is closed.
     - `AnyChange`: Any change in the item's state triggers an occupancy event.
 - Example: `OccupancyEvent = "OnOff"` for a light switch means that turning on the light indicates occupancy.
