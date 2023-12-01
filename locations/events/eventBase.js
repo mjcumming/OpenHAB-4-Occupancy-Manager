@@ -59,10 +59,10 @@ class EventBase {
             this.location.setLocationOccupied (this.itemName,overrideOccupancyTime)
 
             if (eventSettings.occupiedUntilEnded()) { // lock the location until an end event comes from this item
-                self.location.locking.lock();
+                this.location.locking.lock();
             }
         } else {
-            console.warn(`Location ${this.location.itemName} is locked, occupancy state not changed.`);
+            console.log(`Location ${this.location.locationItem.name} is locked, event from item ${this.itemName} occupancy state not changed.`);
             return;
         }
     }
@@ -85,10 +85,10 @@ class EventBase {
                 }
             } // otherwise, do nothing, as end events typically do not indicate a change in state unless a time is specified
         } else if (eventSettings.occupiedUntilEnded()) {
-            console.warn(`Location ${this.location.itemName} unlocked as occupancy event ended`);
+            console.log(`Location ${this.itemName} unlocked as occupancy event ended`);
             this.location.locking.unlock();
         } else {
-            console.warn(`Location ${this.location.itemName} is locked, no change made to occupancy status`);
+            console.log(`Location ${this.location.locationItem.name} is locked, event from item ${this.itemName} occupancy state not changed.`);
         }
     }
 

@@ -26,11 +26,12 @@ class Location {
      * @param {Object} locationItem - The main item representing the location.
      * @param {Object} locations - Contains all location objects indexed by location name.
      */
-    constructor(locationItem, locations) {
+    constructor(locationItem, locations, config) {
         this.locationItem = locationItem;
         this.locations = locations;
+        this.config = config;
         
-        this.occupancySettings = new LocationEventMetadata(this.locationItem.name);
+        this.occupancySettings = new LocationEventMetadata(this.locationItem.name, this.config.createLocationMetadata);
         console.log(`Adding Location ${this.locationItem.name} Occupancy settings: ${this.occupancySettings.getOccupancySettings()}`);
 
         this.occupancyTimer = new OccupancyTimer(this);

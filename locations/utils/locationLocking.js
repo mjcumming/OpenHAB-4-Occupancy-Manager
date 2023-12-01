@@ -32,12 +32,13 @@ class LocationLocking {
     hasLockedChildLocations() {
         const childLocationGroups = LocationUtils.getChildLocations(this.location.locationItem);
         for (const childLocationGroup of childLocationGroups) {
+            console.log(`Checking child location ${childLocationGroup.name} for locking`);
             const location = this.location.locations[childLocationGroup.name];
             if (location === undefined) {
                 console.warn(`Location ${childLocationGroup.name} not found in locations.`);
             } else if (location.locking.isLocked()) {
                 return true;
-            } else if (location.locaking.hasLockedChildLocations()) {
+            } else if (location.locking.hasLockedChildLocations()) {
                 return true;
             }
         }
@@ -61,6 +62,17 @@ class LocationLocking {
         
         if (timeOut) {
             this.startTimer(timeOut);
+        }   
+
+        //lock child locations
+        const childLocationGroups = LocationUtils.getChildLocations(this.location.locationItem);
+        for (const childLocationGroup of childLocationGroups) {
+            const location = this.location.locations[childLocationGroup.name];
+            if (location === undefined) {
+                console.warn(`Location ${childLocationGroup.name} not found in locations.`);
+            } else {
+                location.locking.lock(); //do not pass timeout as we want to use the same timeout for all locations
+            }
         }   
     } 
 
@@ -89,6 +101,17 @@ class LocationLocking {
         if (this.lockingLevel < 0) {
             this.lockingLevel = 0;
             console.warn(`Occupancy Locking level for location ${this.location.locationItem.name} is less than 0, reset to 0`)
+        }
+
+        //unlock child locations
+        const childLocationGroups = LocationUtils.getChildLocations(this.location.locationItem);
+        for (const childLocationGroup of childLocationGroups) {
+            const location = this.location.locations[childLocationGroup.name];
+            if (location === undefined) {
+                console.warn(`Location ${childLocationGroup.name} not found in locations.`);
+            } else {
+                location.locking.unlock();
+            }
         }
     } 
 

@@ -2,7 +2,7 @@
 const { EventBase } = require('./eventBase.js');
 
 /**
- * Represents a contact event that extends the base event class.
+ * Represents an event that is triggered when a contact/motion sensor changes state.
  */
 class EventContact extends EventBase {
     /**

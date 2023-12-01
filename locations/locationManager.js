@@ -2,6 +2,9 @@
 // Load the required modules
 const { LocationEventHandlers } = require ('./utils/locationEventHandlers.js');
 const { Location } = require ('./location.js');
+const intializeDaylightSwtich = require ('./utils/daylightSwitch.js');
+
+
 
 /**
  * The LocationManager class manages a collection of locations and handles location item events.
@@ -10,13 +13,19 @@ class LocationManager {
 
     /**
      * Creates a new instance of the LocationManager class.
+     * @constructor
+     * @param {Object} config - The configuration object containing key-value pairs.
      */
-    constructor() {
+    constructor(config) {
         /**
          * The locations managed by this manager.
          * @type {Object.<string, Location>}
          */
+        intializeDaylightSwtich();
+
         this.locations = {};
+        this.config = config;
+        console.log(`LocationManager config: ${JSON.stringify(this.config)}`);
         this.addExistingLocations();
         this.LocationEventHandlers = new LocationEventHandlers(this);
 
@@ -42,7 +51,7 @@ class LocationManager {
      * @param {Location} locationItem - The location to add.
      */
     addLocation(locationItem) {
-        this.locations[locationItem.name] = new Location(locationItem, this.locations);
+        this.locations[locationItem.name] = new Location(locationItem, this.locations, this.config);
     }
 
     /**

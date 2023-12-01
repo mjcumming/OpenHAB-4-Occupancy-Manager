@@ -18,10 +18,12 @@ class ItemEventMetadata {
     /**
      * Constructs the EventMetadata object.
      * @param {string} item - The OpenHAB item.
+     * @param {boolean} addMetadataPlaceholder - Whether to add a placeholder metadata object if none exists.
      */
-    constructor(item) {
+    constructor(item, addMetadataPlaceholder = false) {
         this.item = item
         this.namespace = "OccupancyEvent";
+        this.addMetadataPlaceholder = addMetadataPlaceholder;
         this.validateMetadata();
         console.debug(`Event settings for item '${this.item.name}': ${this.getMetadataText()}`);
     }
@@ -92,30 +94,40 @@ class ItemEventMetadata {
     validateMetadata() {
         const metadata = this.getMetadata();
 
-        if (!metadata || !metadata.configuration) {
-            //console.warn(`WARNING: No metadata configuration found for item: ${this.item.name}`);
-            return;
-        }
-
-        // List of expected keys and their respective validation functions
-        const validators = {
-            'ModifyBehavior': this.validateModifyBehavior,
-            'BeginOccupiedTime': this.validateIntegerValue,
-            'EndOccupiedTime': this.validateIntegerValue,
-            // Add other keys and their validators as needed
-        };
-
-        // Check for unexpected keys in the metadata
-        for (const key in metadata.configuration) {
-            if (!validators[key]) {
-                console.warn(`WARNING: Unexpected key '${key}' found in metadata for item: ${this.item.name}`);
-            } else {
-                validators[key].call(this, metadata.configuration[key]);
+        if (!metadata) {
+            if (this.addMetadataPlaceholder) {
+                // Add a placeholder metadata object
+                console.log(`Adding placeholder metadata for item: ${this.itemName}`);
+                this.item.replaceMetadata(this.namespace, '', {});
             }
+        }   
+
+        if (typeof this.getEventType() === 'undefined' || this.getEventType() === '') {
+            // ignore empty event types that occur when the item is first created using default metadata
+            return;
         }
 
         if (!this.validateOccupancyEventValue(this.getEventType())) {
             console.warn(`WARNING: Invalid OccupancyEvent value'${this.getEventType()}' for item: ${this.item.name}`);
+        }
+        
+        if (metadata && metadata.configuration) {
+            // List of expected keys and their respective validation functions
+            const validators = {
+                'ModifyBehavior': this.validateModifyBehavior,
+                'BeginOccupiedTime': this.validateIntegerValue,
+                'EndOccupiedTime': this.validateIntegerValue,
+                // Add other keys and their validators as needed
+            };
+
+            // Check for unexpected keys in the metadata
+            for (const key in metadata.configuration) {
+                if (!validators[key]) {
+                    console.warn(`WARNING: Unexpected key '${key}' found in metadata for item: ${this.item.name}`);
+                } else {
+                    validators[key].call(this, metadata.configuration[key]);
+                }
+            }
         }
     }
 
@@ -130,7 +142,7 @@ class ItemEventMetadata {
     }
 
     validateOccupancyEventValue(value) {
-        const allowedValues = ["OnOff", "Contact", "ContactDoor", "ContactMotion", "ContactPresence", "AnyChange"];
+        const allowedValues = ["OnOff", "Contact", "Presence", "AnyChange"];
         return allowedValues.includes(value);
     }
 
@@ -176,22 +188,6 @@ class ItemEventMetadata {
 
 }
  
-/**
- * Test function for the EventMetadata class.
- */
-function testEventMetadata(itemName) {
-    // Create an instance of the EventMetadata class
-    const item = items.getItem(itemName);
-    const eventMetadata = new ItemEventMetadata(item);
-
-    // Now you can call methods on the eventMetadata instance to test them
-    console.log(eventMetadata.getMetadataText());  // For example, this will log the metadata for the supplied item name
-}
-
-// Call the test function
-//testEventMetadata("Outdoor_BackPorchAndPatio_Scene");
-
-
 
 // Export the EventMetadata class for use in other files
 module.exports = {

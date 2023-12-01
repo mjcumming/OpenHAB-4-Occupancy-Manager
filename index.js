@@ -1,9 +1,7 @@
 const OccupancyManager = require('./occupancyManager');
 
-console.log("Occupancy Manager Starting");
+function start(options) {
+    return new OccupancyManager(options);
+}
 
-console.log(typeof OccupancyManager);
-
-module.exports = {
-  OccupancyManager: OccupancyManager
-};
+module.exports = start;

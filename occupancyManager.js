@@ -1,12 +1,12 @@
 
 const { LocationManager } = require('./locations/locationManager.js');
 
-/**
- * Starts the Location Manager
- * 
- * @class
- * @property {LocationManager} locationManager - The Location Manager instance.
+/** 
+ * config: {
+ *  createLocationMetadata: true|false
+ *  CreatePointItemMetadata: true|false
  */
+
 /**
  * The Occupancy Manager class is used to start the Location Manager.
  * @class
@@ -15,21 +15,14 @@ class OccupancyManager {
     /**
      * Create an Occupancy Manager.
      * @constructor
+     * @param {Object} config - The configuration object containing key-value pairs.
      */
-    constructor() {
+    constructor(config) {
         console.log('Occupancy Manager is Starting');
-        this.locationManager = new LocationManager();
-        console.log('Occupancy Manager is Started');
+        this.locationManager = new LocationManager(config);
+        console.log('Occupancy Manager Running');
     }
-
-    /**
-     * Dispose of the Occupancy Manager.
-     * @method
-     */
-    dispose() {
-        this.locationManager.dispose();
-        console.log("OccupancyManager cleanup completed.");
-    }      
+    
 }
 
 module.exports = {

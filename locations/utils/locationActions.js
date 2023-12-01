@@ -26,7 +26,7 @@ class LocationActions {
                     });
                     break;
                 case "LightsOnIfDark":
-                    if (this.location.getItem("DayLight_Switch").state === 'OFF') {
+                    if (items.getItem("DayLight_Switch").state === 'OFF') {
                         pointItems.forEach(item => {
                             if (item.tags.includes("Light")) {
                                 item.sendCommand('ON');
@@ -42,7 +42,7 @@ class LocationActions {
                     });
                     break;
                 case "SceneOnIfDark":
-                    if (this.location.getItem("DayLight_Switch").state === 'OFF') {
+                    if (items.getItem("DayLight_Switch").state === 'OFF') {
                         pointItems.forEach(item => {
                             if (item.tags.includes("Scene")) {
                                 item.sendCommand('ON');

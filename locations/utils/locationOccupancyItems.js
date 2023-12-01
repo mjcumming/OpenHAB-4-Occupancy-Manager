@@ -11,7 +11,7 @@ class LocationOccupancyItems {
         const getItemOrCreate = (name, type, groups, tags, label) => {
             let item = items.getItem(name,true);
             if (!item) {
-                console.log(`Adding ${name} item...`);
+                console.debug(`Adding ${name} item...`);
                 item = items.addItem({
                     type,
                     name,

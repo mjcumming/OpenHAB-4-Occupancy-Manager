@@ -5,30 +5,30 @@ const ThingsAction = Java.type('org.openhab.core.model.script.actions.Things');
 function isCurrentlyDaylight() {
     let sunActions = ThingsAction.getActions("astro","astro:sun:local");
     if (null === sunActions) {
-        console.warn("sunActions not found, check thing ID");
+        console.warn("Occupancy Manager: astro thing astro:sun:local not found, check thing ID");
         return false;
     } else {
         let now = java.time.ZonedDateTime.now();
         let sunriseTime = sunActions.getEventTime("SUN_RISE", now, "END");
         let sunsetTime = sunActions.getEventTime("SUN_SET", now, "START");
-        console.log("Sunrise at: " + sunriseTime + ", Sunset at: " + sunsetTime);
+        console.log("Occupancy manager: Sunrise at: " + sunriseTime + ", Sunset at: " + sunsetTime);
         return now.isAfter(sunriseTime) && now.isBefore(sunsetTime);
     } 
 }
 
 function handleStartup() {
     let daylightState = isCurrentlyDaylight() ? "ON" : "OFF";
-    console.log(`Startup: Setting DayLight_Switch to ${daylightState}`);
+    console.log(`Occupancy Manager: Startup: Setting DayLight_Switch to ${daylightState}`);
     items.getItem("DayLight_Switch").sendCommand(daylightState);
 }
 
 function handleSunrise() {
-    console.log("Sunrise: Turning DayLight_Switch ON");
+    console.log("Occupancy Manager: Sunrise: Turning DayLight_Switch ON");
     items.getItem("DayLight_Switch").sendCommand("ON");
 }
 
 function handleSunset() {
-    console.log("Sunset: Turning DayLight_Switch OFF");
+    console.log("Occupancy Manager: Sunset: Turning DayLight_Switch OFF");
     items.getItem("DayLight_Switch").sendCommand("OFF");
 }
 
@@ -47,9 +47,9 @@ const initialize = () => {    // Check if the item exists
         // Add the item
         items.addItem(itemConfig);
 
-        console.log('OM DayLight_Switch has been created.');
+        console.log('Occupancy Manager: DayLight_Switch has been created.');
     } else {
-        console.log('OM DayLight_Switch exists.');
+        console.log('Occupancy Manager: DayLight_Switch exists.');
     }
     
     // Set up rules

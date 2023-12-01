@@ -12,9 +12,10 @@ class LocationEventMetadata {
      * 
      * @param {string} locationItemName - The name of the location item.
      */
-    constructor(locationItemName) {
+    constructor(locationItemName, addMetadataPlaceholder = false) {
         this.itemName = locationItemName;
         this.namespace = "OccupancySettings";
+        this.addMetadataPlaceholder = addMetadataPlaceholder;
 
         // Retrieve the item object from openHAB using the item name
         this.item = items.getItem(this.itemName);
@@ -33,7 +34,19 @@ class LocationEventMetadata {
 
         // Check if metadata is null
         if (!metadata) {
-            console.warn(`WARNING: Metadata is null for item: ${this.itemName}`);
+            if (this.addMetadataPlaceholder) {
+                // Add a placeholder metadata object
+                console.log(`Adding placeholder metadata for item: ${this.itemName}`);
+                this.item.replaceMetadata(this.namespace, '', {
+                    Time: '',
+                    OccupiedActions: '',
+                    VacantActions: ''
+                });
+            }
+
+
+            // not sure if this is needed anymore or if the error even happens
+            //console.warn(`WARNING: Metadata is null for item: ${this.itemName}`);
             // this happens if we process an item immediately after it was added - it seems the metadata is not available yet, so we need to wait a bit as done in the event handler.
             // this code left here for reference
             return;
@@ -48,17 +61,27 @@ class LocationEventMetadata {
         if (metadata.configuration['OccupiedActions']) {
             const allowedOccupiedActions = ['LightsOn', 'LightsOnIfDark', 'SceneOn', 'SceneOnIfDark'];
             const actions = metadata.configuration['OccupiedActions'].split(',');
-            actions.forEach(action => {
-                if (!allowedOccupiedActions.includes(action)) {
-                    console.warn(`WARNING: Invalid OccupiedAction value '${action}' for item: ${this.itemName}`);
-                }
-            });
+
+            if (actions[0] !== '') {
+                actions.forEach(action => {
+                    if (!allowedOccupiedActions.includes(action)) {
+                        console.warn(`WARNING: Invalid OccupiedAction value '${action}' for item: ${this.itemName}`);
+                    }
+                });
+            }
         }
 
         // Check for VacantActions
         if (metadata.configuration['VacantActions']) {
             const allowedVacantActions = ['LightsOff', 'SceneOff', 'ExhaustFansOff', 'AVOff'];
             const actions = metadata.configuration['VacantActions'].split(',');
+            if (actions[0] !== '') {
+                actions.forEach(action => {
+                    if (!allowedVacantActions.includes(action)) {
+                        console.warn(`WARNING: Invalid VacantAction value '${action}' for item: ${this.itemName}`);
+                    }
+                });
+            }   
             actions.forEach(action => {
                 if (!allowedVacantActions.includes(action)) {
                     console.warn(`WARNING: Invalid VacantAction value '${action}' for item: ${this.itemName}`);
