@@ -7,7 +7,7 @@ Welcome to the Occupancy Manager module, a location-based occupancy management a
 
 ## Purpose
 
-In the realm of home automation, determining whether a specific location within the home is occupied is crucial. The Occupancy Manager module for OpenHAB 4 simplifies this by utilizing OpenHAB's semantic model, offering a refined system for managing locations and tracking their occupancy. The module operates on two core components:
+In the realm of home automation, determining whether a specific location within the home is occupied is frquently required to automate various tasks. The Occupancy Manager module for OpenHAB 4 simplifies this by leveraging OpenHAB's semantic model, offering a refined system for managing locations and tracking their occupancy. The Occupancy Manager utilizies any type of events in a location to determine occupancy. For example, turning on a light or changing the volume of a speaker are all events that can be used to determine that a location is occupied. The second (optional) feature of the Occupancy Manager is the ability to turn on or off various devices in a location based on the occupancy status. These featurea are represented in the two core components:
 
 - **Occupancy Status Determination**: Using events from existing devices (like light switches, AV systems, and motion sensors) to dynamically track the occupancy status of locations, eliminating the need for dedicated presence sensors in every location.  
 - **Optional Event-Driven Automation**: If desired, the module can automate tasks based on the occupancy state, such as adjusting lighting, HVAC systems, and media devices to enhance comfort and energy efficiency.
@@ -36,17 +36,26 @@ Installing the Occupancy Manager module is a quick process. Follow these instruc
 
     This command installs the Occupancy Manager module and its dependencies into your OpenHAB system.
 
+## Starting the Occupancy Manager
+    ```text
+    const start = require('occupancymanager');
+
+    start( { createLocationMetadata: true, createPointItemMetadata: true } );
+    ```
+
 ## Configuration of the Occupancy Manager Module  
 
-TThis section guides you through defining locations, setting up metadata, and configuring items for occupancy detection.
+This section guides you through defining locations, setting up item metadata, and configuring items for occupancy detection.
 
 ### Basic Configuration Overview
 
-Configuration involves defining locations, setting up location-specific metadata, and configuring items (like switches or sensors) influencing occupancy status. Accurate configuration ensures the module reflects the occupancy status and integrates seamlessly with your home automation system.
+Configuration involves defining locations using the semantic model, setting up location-specific metadata, and configuring items (like switches or sensors) influencing occupancy status. Accurate configuration ensures the module reflects the occupancy status and integrates seamlessly with your home automation system.
+
+The module has two options that will automatically generate the metadata namespace for location items, and metadata for point items (switches, dimmers, contacts). Enabling the automatical creating of the namespace will make configuration easier.
 
 #### Defining Locations
 
-Locations in OpenHAB 4 are set using semantic modeling. Each location represents a distinct space within your home, such as a bathroom, bedroom, or kitchen. 
+Locations in OpenHAB 4 are set using semantic modeling. Each location represents a distinct space within your home, such as a bathroom, bedroom, or kitchen. Ideally Locations are defined in a hierarchial fashion.
 
 **Steps to Define a Location:**
 
@@ -68,7 +77,7 @@ Metadata for each location controls its occupancy behavior.
 
 **Key Metadata Settings:**
 
-- `Time`: Duration (in minutes) a location remains 'occupied' after an event.
+- `Time`: Duration (in minutes) a location remains 'occupied' after an event from a point item in that location.
 - `VacantActions`: Actions triggered when a location becomes vacant. 
 - `OccupiedActions`: Actions triggered when a location becomes occupied.
 
@@ -105,7 +114,7 @@ Items like light switches or motion sensors are grouped in location, and events 
 
 ```text  
 Switch LightSwitch_Bathroom "Bathroom Light" (gBathroom) ["Lighting"] { 
-    OccupancyEvent = "OnOff" 
+    OccupancyEvent = "Switch" 
 }
 ```
 
@@ -127,18 +136,15 @@ Group gFirstFloor "First Floor" <icon> ["FirstFloor"]
 Group gBathroom "Bathroom" <icon> (gFirstFloor) ["Bathroom"]
 ```
 
-In this setup, the bathroom is a part of the first floor, and events in the bathroom propagate to the first floor level.
+In this setup, the bathroom is a part of the first floor, and events in the bathroom propagate to the first floor level. So an event in the bathroom that sets the bathroom to occupied is also propatgated to the First Floor reseting its occupancy timer. Only events that set a location to occupied  or that update that locations occupancy timer, are used to reset the parent location occpuancy timer. A vacancy event in a location does not change the occpuancy status of a parent location.
 
 ### Custom Automation and Extended Functionality  
 
-The Occupancy Manager module allows for custom automation based on occupancy states.
+The Occupancy Manager module allows for custom automation based on occupancy states without the need to write rules.
 
-#### Creating Custom Automation Rules:  
+#### Creating Automation from Occupancy Status:  
 
-1. Use Occupancy States: Develop rules that trigger based on the occupancy status of locations.
-2. Integrate with OpenHAB Rules Engine: Leverage OpenHAB's rules engine to create complex automation scenarios.
-
-**Example:** A rule might turn on hallway lights when the bathroom is occupied during night hours.
+The module allows for basic automation of items based on occupancystatus without the need to write rules. More complex automations require using the Occupancy Item for that location to write more complex rules
 
 ### Example Configuration Scenarios  
 
@@ -146,22 +152,43 @@ To help you better understand how to apply these configurations, here are some p
 
 #### Bathroom Occupancy:
 
-- When a light switch in the bathroom is turned on, the Occupancy Manager sets the bathroom as occupied for 15 minutes. If no other activity is detected, it then marks it as vacant, turning off the lights and exhaust fan automatically.
+The module can be configured to turn on the bathroom lights at night when motion is detected.
 
-Metadata configuration for the bathroom would look like this:  
+The location is configured as follows:
 
 ```text
-Group gBathroom "Bathroom" <icon> (gFirstFloor) ["Bathroom"] { 
-    OccupancySettings = "" 
+Group gBathroom "Bathroom" <icon> (gFirstFloor) ["Bathroom"] { OccupancySettings = "" 
     [Time = 15,  
+     OccupiedActions = "LightsOnIfDark"
      VacantActions = "LightsOff, ExhaustFansOff"]  
 }
 ```
+The motion sensor is configured as follows:
 
-#### First Floor Monitoring:  
+```text
+Contact Bathroom_MotionSensor "Bathroom Room Motion" <motion>	(gEquip_Bathroom_Sensors) {OccupancyEvent = "Contact"}	
+```
 
-- Activities in any room on the first floor update the occupancy status of the entire floor. For instance, occupancy in the bathroom triggers the first floor's occupancy status.
-- A rule could be created to adjust the HVAC settings based on the occupancy of the first floor.
+The motion item is configured to gennerate an Occupancy Event "Contact" which is one the predefined events that items can generate (details below).
+
+The light is configured as follows:
+
+```
+Dimmer Bathroom_Dimmmer "Bathroom Lights" <light>    (gEquip_Bathroom_Lights) ["Light"]  {OccupancyEvent = "Switch"}
+
+```
+Note that light item has also been tagged with "Light". Tagging items to be controlled by the Occupancy Manager using occupancy events is required. Using the Semantic Model for identifing point items to control is too limited. 
+
+```
+Switch BathroomExhaustFan_Switch "Bathroom Fan"  <fan> (gEquip_Bathroom_ExhaustFan)  ["ExhaustFan"]  {OccupancyEvent = "Switch"}
+```
+The exhaust fan has been tagged "ExhaustFan"
+
+// The gEquip_* groups here represent equipment groupings defined as part of the semantic model. They are optional and not strictly required for the Occupancy Manager to function. Items could be associated directly with the gBathroom group.
+
+With this configuration, when the motion sensor detects motion, the bathhroom light is automatically turned on and the bathroom is set to occupied for 15 minutes. If the motion sensor is triggered again, the timer will be reset to 15 minutes. On the way out of the bathroom, if the exhaust fan is turned on, this will also generate an occpuancy event and reset the timer to 15 minutes. After 15 minutes of no events, the bathroom lights and fan will be turned off. 
+
+Metadata configuration for the bathroom would look like this:  
 
 This section provides an outline for setting up the Occupancy Manager module, including advanced hierarchical structures and custom automation scenarios.
 
@@ -206,11 +233,11 @@ Item metadata in the Occupancy Manager module dictates how the state changes of 
 
 - Description: Specifies the type of occupancy event the item generates.  
 - Options:
-    - `OnOff`: An item (like a light switch or dimmer) triggers an occupancy event when turned on.  
+    - `Switch`: An item (like a light switch or dimmer) triggers an occupancy event when turned on.  
     - `ContactMotion`: A motion sensor triggers an occupancy event when motion is detected. 
     - `ContactDoor`: A door sensor triggers an occupancy event when opened and affects the occupancy status until it is closed.
     - `AnyChange`: Any change in the item's state triggers an occupancy event.
-- Example: `OccupancyEvent = "OnOff"` for a light switch means that turning on the light indicates occupancy.
+- Example: `OccupancyEvent = "Switch"` for a light switch means that turning on the light indicates occupancy.
 
 **BeginOccupiedTime and EndOccupiedTime (Optional)**  
 
@@ -218,7 +245,7 @@ Item metadata in the Occupancy Manager module dictates how the state changes of 
 - Usage:
     - `BeginOccupiedTime`: Sets a custom duration for how long the area remains occupied after the item triggers an event.
     - `EndOccupiedTime`: Defines a custom duration for an area to remain occupied after the item's event ceases. 
-- Example: `OccupancyEvent = "OnOff" [EndOccupiedTime = 0]` for a light switch means the area becomes vacant immediately when the light is turned off.  
+- Example: `OccupancyEvent = "Switch" [EndOccupiedTime = 0]` for a light switch means the area becomes vacant immediately when the light is turned off.  
 
 #### Configuring Items for Occupancy  
 
@@ -228,7 +255,7 @@ Each item that contributes to occupancy detection must be configured with approp
 
 ```text  
 Switch LightSwitch_Bathroom "Bathroom Light" (gBathroom) ["Lighting"] { 
-    OccupancyEvent = "OnOff" 
+    OccupancyEvent = "Switch" 
 }
 ```  
 
@@ -250,6 +277,34 @@ Here, the motion sensor in the bathroom:
 
 - Is linked to the `gBathroom` group.  
 - Triggers an occupancy event (occupancy starts) upon detecting motion.
+
+#### Occupied and Vacant Actions
+
+The following are possible automations for when an area becomes occupied:
+
+**LightsOn** - will turn on any lights in a location that are point items tagged "Light"
+**LightsOnIfDark** - will turn any lights in a location that are point items tagged "Light" when it is dark out
+**SceneOn** - will activate any scenes in a location that are point items tagged "Scene"
+**SceneOnIfDark** - will activate any scenes in a location that are point items tagged "Scene" when it is dark out
+**AVOn** - will turn on any AV items in a location that are point items tagged "AVPower"
+**ExhaustFansOn** - will turn on any exhaust fan items in a location that are point items tagged "ExhaustFan"
+
+The following are possible automations for when an are become vacant:
+
+**LightsOff** - will turn off any lights in a location that are point items tagged "Light"
+**SceneOff** - will turn off any scenes in a location that are point items tagged "Scene"
+**AVOff** - will turn off any AV items in a location that are point items tagged "AVPower"
+**ExhaustFansOff** - will turn off any exhaust fan items in a location that are point items tagged "ExhaustFan"
+ 
+#### Tagging of items for automation by the Occupancy Manager
+
+Items that you want to automate need to be tagged for the Occupancy Manager to control them. Items must be a Point Item in the Semantic Model. They are then tagged as follows:
+
+
+- **Light**
+- **Scene**
+- **AVPower**
+- **ExhaustFan**
 
 ##### Considerations for Item Configuration  
 

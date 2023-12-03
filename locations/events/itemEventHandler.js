@@ -5,7 +5,7 @@
  */
 
 // Importing required classes
-const { EventOnOff }= require('./eventOnOff');
+const { EventSwitch }= require('./eventSwitch');
 const { EventContact } = require('./eventContact');
 const { EventPresence } = require('./eventPresence');
 const { EventAnyChange } = require('./eventAnyChange');
@@ -13,7 +13,7 @@ const { EventAnyChange } = require('./eventAnyChange');
 const { ItemEventMetadata } = require('../itemEventMetadata');
 
 const eventToClass = {
-    'OnOff': EventOnOff,
+    'Switch': EventSwitch,
     'Contact': EventContact,
     'Presence': EventPresence,
     'AnyChange': EventAnyChange,

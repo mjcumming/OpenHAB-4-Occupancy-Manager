@@ -1,5 +1,5 @@
 
-const { EventBase } = require('occupancymanager/locations/events/eventBase.js');
+const { EventBase } = require('./eventBase.js');
 
 /**
  * Represents an event for contact presence.

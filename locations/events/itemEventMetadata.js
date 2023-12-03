@@ -142,7 +142,7 @@ class ItemEventMetadata {
     }
 
     validateOccupancyEventValue(value) {
-        const allowedValues = ["OnOff", "Contact", "Presence", "AnyChange"];
+        const allowedValues = ["Switch", "Contact", "Presence", "AnyChange"];
         return allowedValues.includes(value);
     }
 
