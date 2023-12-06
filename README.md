@@ -20,6 +20,18 @@ In the realm of home automation, determining whether a specific location within 
 - **Hierarchical Location Structure**: Supports event propagation across different locations, from individual locations to the entire home.  
 - **Ease of Use**: Encapsulates all necessary logic within the module, shifting the focus from coding to configuring, making occupancy management easy.
 
+## Real-life Examples
+
+### Arriving Home
+When you arrive home and open the door, the system detects this and sets the main floor as occupied, automatically turning on the main floor lights.
+
+### Leaving Home
+When you leave your home with the lights and TV on, the system turns them off after detecting no occupancy for a set time, all without needing to write specific rules.
+
+## System Requirements
+
+- JavaScript (ECMAScript 2022+) binding must be enabled in OpenHAB.
+
 ## Installation
 
 Installing the Occupancy Manager module is a quick process. Follow these instructions to get started:
@@ -37,6 +49,7 @@ Installing the Occupancy Manager module is a quick process. Follow these instruc
     This command installs the Occupancy Manager module and its dependencies into your OpenHAB system.
 
 ## Starting the Occupancy Manager
+    
     ```text
     const start = require('occupancymanager');
 
