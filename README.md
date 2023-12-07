@@ -15,8 +15,8 @@ In the realm of home automation, determining whether a specific location within 
 ## Key Features
 
 - **Semantic Location Management**: Uses the semantic model to determine locations to monitor occupancy.
-- **Dynamic Occupancy Tracking**: Determines the occupancy status of locations using events from existing devices. 
-- **Automated and Manual Control**: Offers both automated actions based on occupancy states and users' ability to control actions using generated items in each location manually. This allows users to choose between automated tasks or custom rule-based automation.
+- **Dynamic Occupancy Tracking**: Determines the occupancy status of locations using events from existing devices in that location. 
+- **Automated and Manual Control**: Offers both automated actions based on occupancy states and users' ability to control actions using generated items in each location manually in rules. This allows users to choose between automated tasks or custom rule-based automation.
 - **Hierarchical Location Structure**: Supports event propagation across different locations, from individual locations to the entire home.  
 - **Ease of Use**: Encapsulates all necessary logic within the module, shifting the focus from coding to configuring, making occupancy management easy.
 
@@ -26,7 +26,7 @@ In the realm of home automation, determining whether a specific location within 
 When you arrive home and open the door, the system detects this and sets the main floor as occupied, automatically turning on the main floor lights.
 
 ### Leaving Home
-When you leave your home with the lights and TV on, the system turns them off after detecting no occupancy for a set time, all without needing to write specific rules.
+When you leave your home with the lights and TV on, the system turns them off after detecting no occupancy events for a set time, all without needing to write specific rules.
 
 ## System Requirements
 
@@ -50,7 +50,7 @@ Installing the Occupancy Manager module is a quick process. Follow these instruc
 
 ## Starting the Occupancy Manager
     
-    ```text
+    ```
     const start = require('occupancymanager');
 
     start( { createLocationMetadata: true, createPointItemMetadata: true } );
