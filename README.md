@@ -151,6 +151,15 @@ Group gBathroom "Bathroom" <icon> (gFirstFloor) ["Bathroom"]
 
 In this setup, the bathroom is a part of the first floor, and events in the bathroom propagate to the first floor level. So an event in the bathroom that sets the bathroom to occupied is also propatgated to the First Floor reseting its occupancy timer. Only events that set a location to occupied  or that update that locations occupancy timer, are used to reset the parent location occpuancy timer. A vacancy event in a location does not change the occpuancy status of a parent location.
 
+**Example event propagation: TV Volume is changed, and the Family Room, Main Floor, and Home Occupancy times are all updated**
+
+```
+[INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'FamilyRoom_SonyTV_Volume' changed from 18 to 28
+[INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'gLocMainFloorFamilyRoom_Occupancy_Time' changed from Tue Dec 05 2023 20:42:31 GMT-0600 (CST) to Tue Dec 05 2023 20:49:03 GMT-0600 (CST)
+[INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'gLocMainFloor_Occupancy_Time' changed from Tue Dec 05 2023 21:42:31 GMT-0600 (CST) to Tue Dec 05 2023 21:49:03 GMT-0600 (CST)
+[INFO ] [openhab.event.ItemStateChangedEvent ] - Item 'gLocHome_Occupancy_Time' changed from Tue Dec 05 2023 20:48:46 GMT-0600 (CST) to Tue Dec 05 2023 20:49:03 GMT-0600 (CST)
+```
+
 ### Custom Automation and Extended Functionality  
 
 The Occupancy Manager module allows for custom automation based on occupancy states without the need to write rules.
