@@ -1,6 +1,6 @@
 {
   "name": "occupancymanager",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "description": "Occupany Manager for openHAB using semantic locations and point items to determine occupancy status.",
   "main": "index.js",
   "scripts": {

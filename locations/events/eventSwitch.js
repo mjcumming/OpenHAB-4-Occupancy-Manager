@@ -1,5 +1,5 @@
 // Use CommonJS require syntax
-const { EventBase }= require('occupancymanager/locations/events/eventBase');
+const { EventBase }= require('./eventBase');
 
 /**
  * Represents an event that triggers when an item turns on or off.

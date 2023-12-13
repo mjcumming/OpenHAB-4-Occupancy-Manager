@@ -32,7 +32,7 @@ class LocationLocking {
     hasLockedChildLocations() {
         const childLocationGroups = LocationUtils.getChildLocations(this.location.locationItem);
         for (const childLocationGroup of childLocationGroups) {
-            console.log(`Checking child location ${childLocationGroup.name} for locking`);
+            console.debug(`Checking child location ${childLocationGroup.name} for locking`);
             const location = this.location.locations[childLocationGroup.name];
             if (location === undefined) {
                 console.warn(`Location ${childLocationGroup.name} not found in locations.`);
