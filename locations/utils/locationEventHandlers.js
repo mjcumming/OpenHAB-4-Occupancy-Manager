@@ -1,6 +1,6 @@
 // Description: This file contains the LocationEventHandlers class that handles and dispatches location events to the locaiton. We capture all events and hand them off versus creating seperate rules for every location
 
-const { GenericEventTrigger } = require ('./GenericEventTrigger.js');
+//const { GenericEventTrigger } = require ('./GenericEventTrigger.js');// no longer required as of OH 4.2.0
 const { LocationUtils } = require ('./locationUtils.js');
 
 
@@ -34,10 +34,11 @@ class LocationEventHandlers {
      * Register event handlers for location events.
      */
     registerEventHandlers() {      
+        console.log("Registering Location Event Handlers")
         // Capture add events to add new locations
         rules.JSRule({
             name: "Occupany Manager Item Added",
-            triggers: [GenericEventTrigger.getTrigger("openhab/items/**","","ItemAddedEvent","OccupancyManagerItemAddedEvent")],
+            triggers: [triggers.GenericEventTrigger("openhab/items/**","","ItemAddedEvent","OccupancyManagerItemAddedEvent")],
             execute: (event) => {
                 const item = items.getItem(event.payload.name);
                 //console.warn(`Item ${item.name} added to the system.`);
@@ -59,7 +60,7 @@ class LocationEventHandlers {
         // Capture remove events to remove locations
         rules.JSRule({
             name: "Occupancy Manager Item Removed",
-            triggers: [GenericEventTrigger.getTrigger("openhab/items/**","","ItemRemovedEvent","OccupancyManagerItemRemovedEvent")],
+            triggers: [triggers.GenericEventTrigger("openhab/items/**","","ItemRemovedEvent","OccupancyManagerItemRemovedEvent")],
             execute: (event) => {
                 //console.log(`Item ${event.payload.name} removed from the system.`);
                 // we get all item removed events here, the item is gone, we do not know if it was a location or not so we pass it on to the location manager and let it figure it out
@@ -72,75 +73,85 @@ class LocationEventHandlers {
         // Capture item change events for occupancy events from points, or occupancy state change or locking change
         rules.JSRule({
             name: "Occupany Manager Item State Changed Event",
-            triggers: [GenericEventTrigger.getTrigger("openhab/items/**","","ItemStateChangedEvent","OccupancyManagerItemStateEvent")],
+            triggers: [triggers.GenericEventTrigger("openhab/items/**","","ItemStateChangedEvent","OccupancyManagerItemStateEvent")],
             execute: (event) => {
-                if (event.oldItemState === null) { // avoid events from persistence
-                    return;
-                }
-                console.debug(`Occupancy Item Event for Item ${event.itemName}`);
+                //console.log(`Item ${event.itemName} changed to ${event.itemState} from ${event.oldItemState}`);
+                //if (event.oldItemState === null && event.itemState !== null) { // avoid events from persistence
+                    console.debug(`Occupancy Item Event for Item ${event.itemName}`);
 
-                const item = items.getItem(event.itemName);
-        
-                if (item.semantics.isPoint) {
-                    const locationItem = LocationUtils.getLocationItemForItem(item);
-                    const location = this.locationManager.getLocation(locationItem.name);
+                    const item = items.getItem(event.itemName);
 
-                    if (location) {
-                        location.itemEventHandler.handleEvent(event);
-                    } else {
-                        console.debug(`Item ${item.name} is not associated with a location.`);
+                    if (item.semantics.isPoint) {
+                        const locationItem = LocationUtils.getLocationItemForItem(item);
+                        if (locationItem) {
+                            const location = this.locationManager.getLocation(locationItem.name);
+
+                            if (location) {
+                                location.itemEventHandler.handleEvent(event);
+                            } else {
+                                console.debug(`Item ${item.name} is not associated with a location.`);
+                            }
+                        } else {
+                            console.debug(`Item ${item.name} does not have a location item.`);
+                        }
                     }
-                }
+                //}
             },
             tags: ["OccupancyManagerHandler"],
             id: "OccupancyManagerItemStateEvent"
         });
         
-        // Captures commands to items, used for occupancy state and occupancy control processing
+        // Captures commands to items, used for occupancy state and occupancy control items event processing
         rules.JSRule({
             name: "Occupancy Manager Item Command",
-            triggers: [GenericEventTrigger.getTrigger("openhab/items/**", "", "ItemCommandEvent", "OccupancyManagerItemCommandEvent")],
+            triggers: [triggers.GenericEventTrigger("openhab/items/**", "", "ItemCommandEvent", "OccupancyManagerItemCommandEvent")],
             execute: (event) => {
+                console.warn("Item Command Event received:", event);
+
                 const item = items.getItem(event.itemName);
                 const locationItem = LocationUtils.getLocationItemForItem(item); 
 
                 if (locationItem) {
+                    console.warn ('found location', locationItem.name)
                     const location = this.locationManager.getLocation(locationItem.name);
+                    const command = event.payload.value
+                    console.warn ('command', command)
 
                     if (location) {
                         // check if the item is an occupancy state item
+                        console.warn ('found location', location)
                         if (item.tags.includes("OccupancyState")) {
-                            console.log(`Location ${location.locationItem.name} received command from Occupancy State item ${event.itemCommand}`);
+                            console.log(`Location ${location.locationItem.name} received command from Occupancy State item ${command}`);
                     
-                            if (event.itemCommand === 'ON') {
+                            if (command === 'ON') {
                                 location.setLocationOccupied('Direct command from Occupancy State Item');
-                            } else if (event.itemCommand === 'OFF') {
+                            } else if (command === 'OFF') {
                                 location.setLocationVacant('Direct command from Occupancy State Item');
                             } else {
-                                console.warn(`Unknown occupancy state command ${event.itemCommand}`);
+                                console.warn(`Unknown occupancy state command ${command}`);
                             }
                             
-                        } else if (item.tags.includes("OccupancyLocking")) {
-                            console.log(`Location ${location.locationItem.name} received command from Occupancy Control item ${event.type}`);
+                        } else if (item.tags.includes("OccupancyControl")) {
+                            console.warn(`Location ${location.locationItem.name} received command from Occupancy Control item ${command}`);
 
-                            const parts = event.itemCommand.split(',');
-                            const command = parts[0];
+                            const parts = command.split(',');
+                            //const command = parts[0];
 
-                            switch (command) {
+                            switch (parts[0]) {
                                 case 'LOCK':
                                     if (parts.length === 2) {
-                                        this.location.locationLock.lock(parseInt(parts[1], 10));
+                                        location.locking.lock(parseInt(parts[1], 10));
                                     } else {
-                                        this.location.locationLock.lock();
+                                        location.locking.lock();
                                     }
                                     break;
                                 
                                 case 'UNLOCK':
-                                    this.location.locationLock.unlock();
+                                    location.locking.unlock();
                                     break;
 
                                 case 'CLEARLOCKS':
-                                    this.location.locationLock.clearLock();
+                                    location.locking.clearLock();
                                     break;
 
                                 default:

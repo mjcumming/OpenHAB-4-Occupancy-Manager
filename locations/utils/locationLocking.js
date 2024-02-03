@@ -54,7 +54,7 @@ class LocationLocking {
         console.log(`Locking level for location ${this.location.locationItem.name} is ${this.lockingLevel}`) 
         if (this.lockingLevel === 1 && this.location.occupancyTimer.timeOut !== null) {
             this.secondsLeftWhenLocked = (this.location.occupancyTimer.timeOut - Date.now()) / 1000;
-            console.log(`Occupancy Locking turned on, time left in seconds ${this.secondsLeftWhenLocked}`);
+            console.log(`Occupancy Locking turned on, occupancy time left in seconds ${this.secondsLeftWhenLocked}`);
         }
         // update locking state
         this.location.occupancyItems.occupancyLockingItem.postUpdate("ON");
@@ -83,18 +83,21 @@ class LocationLocking {
         this.lockingLevel--;
         console.log(`Unlocking level for location ${this.location.locationItem.name} is ${this.lockingLevel}`)
         if (this.lockingLevel === 0) {
-            console.log(`Occupancy Locking turned off for location ${this.location.locationItem.name}, occupancy time left in seconds ${this.secondsLeftWhenLocked}`)
+            console.log(`Occupancy Locking turned off for location ${this.location.locationItem.name}`)
             this.location.occupancyItems.occupancyLockingItem.postUpdate("OFF");
-            this.cancelTimer();
+            this.cancelTimer(); //cancel the timer for locking if there was one
 
-            if (this.secondsLeftWhenLocked !== null) {
-                if (this.location.isLocationOccupied()) {
-                    console.log(`Occupancy Locking turned off for location ${this.location.locationItem.name}, Timer restarted with time left ${Math.floor(this.secondsLeftWhenLocked)} seconds`);
+            if (this.location.isLocationOccupied()) {
+                if (this.secondsLeftWhenLocked !== null) {
+                    console.log(`Occupancy Timer restarted with time left ${Math.floor(this.secondsLeftWhenLocked)} seconds`);
                     this.location.occupancyTimer.start(this.secondsLeftWhenLocked);
                     this.secondsLeftWhenLocked = null;
+                } else {
+                    console.log(`Occupancy Timer restarted with location default time`);
+                    this.location.occupancyTimer.start(this.location.occupancySettings.getOccupancyTime());
                 }
             } else {
-                console.log(`Occupancy Locking turned off for location ${this.location.locationItem.name}, location vacant and occupancy timer NOT restarted`);
+                console.log(`Occupancy Timer NOT restarted as location is not occupied`);
             }
         }
 

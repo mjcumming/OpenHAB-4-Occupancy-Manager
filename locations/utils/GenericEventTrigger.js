@@ -1,3 +1,5 @@
+//No longer required as of OH 4.2.0
+
 // Import necessary modules from openHAB's JS Scripting binding
 const ModuleBuilder = Java.type('org.openhab.core.automation.util.ModuleBuilder');
 const Configuration = Java.type('org.openhab.core.config.core.Configuration');

@@ -48,7 +48,6 @@ class LocationUtils {
     static getLocationItemForItem(item) {
         const locationItem = item.semantics.location;
         if (!locationItem) {
-            console.info(`Item ${item.name} does not belong to a Location.`);
             return null;
         }
 
@@ -107,44 +106,6 @@ class LocationUtils {
         return items;
     }
 }
-
-
-// ... [LocationUtils class code]
-
-// Test function
-function testLocationUtils(itemName) {
-    const locationItem = items.getItem(itemName);
-    
-    if (!locationItem.semantics || !locationItem.semantics.isLocation) {
-        console.log(`The item '${itemName}' is not a location.`);
-        return;
-    }
-
-    const parentLocation = LocationUtils.getParentLocation(locationItem);
-    const childLocations = LocationUtils.getChildLocations(locationItem);
-
-    console.log(`Location: ${locationItem.label}`);
-    
-    if (parentLocation) {
-        console.log(`Parent: ${parentLocation.label}`);
-    } else {
-        console.log(`Parent: None`);
-    }
-
-    if (childLocations.length > 0) {
-        console.log(`Children:`);
-        childLocations.forEach(child => {
-            console.log(`- ${child.label}`);
-        });
-    } else {
-        console.log(`No child locations.`);
-    }
-}
-
-// Call the test function with a sample itemName
-//testLocationUtils("gLocSecondFloor");
-
-module.exports = LocationUtils;
 
 module.exports = {
     LocationUtils : LocationUtils

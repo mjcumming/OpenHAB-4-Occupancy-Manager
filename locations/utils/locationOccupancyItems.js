@@ -16,7 +16,7 @@ class LocationOccupancyItems {
                     type,
                     name,
                     groups: [this.locationItem.name, ...groups],
-                    tags: ['OccupancyManager'],
+                    tags: ['OccupancyManager',...tags],
                     label: this.locationItem.name + label
                 });
             }
