@@ -106,20 +106,20 @@ class LocationEventHandlers {
             name: "Occupancy Manager Item Command",
             triggers: [triggers.GenericEventTrigger("openhab/items/**", "", "ItemCommandEvent", "OccupancyManagerItemCommandEvent")],
             execute: (event) => {
-                console.warn("Item Command Event received:", event);
+                //console.warn("Item Command Event received:", event);
 
                 const item = items.getItem(event.itemName);
                 const locationItem = LocationUtils.getLocationItemForItem(item); 
 
                 if (locationItem) {
-                    console.warn ('found location', locationItem.name)
+                    //console.warn ('found location', locationItem.name)
                     const location = this.locationManager.getLocation(locationItem.name);
                     const command = event.payload.value
-                    console.warn ('command', command)
+                    //console.warn ('command', command)
 
                     if (location) {
                         // check if the item is an occupancy state item
-                        console.warn ('found location', location)
+                        //console.warn ('found location', location)
                         if (item.tags.includes("OccupancyState")) {
                             console.log(`Location ${location.locationItem.name} received command from Occupancy State item ${command}`);
                     
@@ -132,7 +132,7 @@ class LocationEventHandlers {
                             }
                             
                         } else if (item.tags.includes("OccupancyControl")) {
-                            console.warn(`Location ${location.locationItem.name} received command from Occupancy Control item ${command}`);
+                            //console.warn(`Location ${location.locationItem.name} received command from Occupancy Control item ${command}`);
 
                             const parts = command.split(',');
                             //const command = parts[0];
