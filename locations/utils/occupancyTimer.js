@@ -28,8 +28,8 @@ class OccupancyTimer {
         };
 
         // Start the new timer.
-        this.occupancyTimer = setTimeout(timeoutCallback, timeOutSeconds * 1000);
-        this.timeOut = new Date(timeStarted.getTime() + timeOutSeconds * 1000); // Expected time of timer expiry.
+        this.occupancyTimer = setTimeout(timeoutCallback, parseInt(timeOutSeconds) * 1000);
+        this.timeOut = new Date(timeStarted.getTime() + parseInt(timeOutSeconds) * 1000); // Expected time of timer expiry.
 
         console.info(`Occupancy Timer started for location ${this.location.locationItem.name} expires at ${this.timeOut}, in ${parseInt(timeOutSeconds/60)} minutes`);
         

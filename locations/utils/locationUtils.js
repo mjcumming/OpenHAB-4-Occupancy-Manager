@@ -80,9 +80,9 @@ class LocationUtils {
     }
 
     /**
-     * Get all point items for a given location.
-     * @param {Object} item - The location item.
-     * @returns {Array} An array of point items for the location.
+     * Gets all point items in a location
+     * @param {Item} item - The location item to search
+     * @returns {Array} Array of point items
      */
     static getPointItems(item) {
         const items = [];
@@ -102,11 +102,164 @@ class LocationUtils {
         };
 
         enumerateEquipmentItems(item);
+        return items;
+    }
+
+    /**
+     * Gets all lighting point items in a location
+     * @param {Item} locationItem - The location item to search
+     * @returns {Array} Array of lighting control point items
+     */
+    static getLightingItems(locationItem) {
+        const items = [];
+
+        const processEquipment = (equipment) => {
+            // Check if this is a lighting equipment
+            if (equipment.tags.includes("Light")) {
+                equipment.members.forEach(member => {
+                    // Get points that are tagged for lighting control
+                    if (member.semantics && member.semantics.isPoint && 
+                        ((member.tags.includes("Control") && member.tags.includes("Light")) ||
+                         (member.tags.includes("Switch") && member.tags.includes("Light")) ||
+                         (member.tags.includes("Control") && member.tags.includes("ColorTemperature")))) {
+                        items.push(member);
+                    }
+                });
+            }
+        };
+
+        // Iterate through location members
+        locationItem.members.forEach(member => {
+            if (member.semantics && member.semantics.isEquipment) {
+                processEquipment(member);
+            } else if (member.semantics && member.semantics.isLocation) {
+                // Handle nested locations (e.g., Master Suite containing Master Bedroom)
+                member.members.forEach(submember => {
+                    if (submember.semantics && submember.semantics.isEquipment) {
+                        processEquipment(submember);
+                    }
+                });
+            }
+        });
+
+        return items;
+    }
+
+    /**
+     * Checks if an item is a lighting control point
+     * @param {Item} item - The item to check
+     * @returns {boolean} True if item is a lighting control point
+     */
+    static isLightingItem(item) {
+        return item.semantics && 
+               item.semantics.isPoint && 
+               ((item.tags.includes("Control") && item.tags.includes("Light")) ||
+                (item.tags.includes("Switch") && item.tags.includes("Light")) ||
+                (item.tags.includes("Control") && item.tags.includes("ColorTemperature")));
+    }
+
+    /**
+     * Gets all point items with a specific tag in a location
+     * @param {Item} locationItem - The location item to search
+     * @param {string} tag - The tag to search for
+     * @returns {Array} Array of matching point items
+     */
+    static getItemsByTag(locationItem, tag) {
+        const items = [];
+
+        const processEquipment = (equipment) => {
+            equipment.members.forEach(member => {
+                if (member.semantics && member.semantics.isPoint && member.tags.includes(tag)) {
+                    items.push(member);
+                }
+            });
+        };
+
+        // Iterate through location members
+        locationItem.members.forEach(member => {
+            if (member.semantics && member.semantics.isEquipment) {
+                processEquipment(member);
+            } else if (member.semantics && member.semantics.isLocation) {
+                // Handle nested locations
+                member.members.forEach(submember => {
+                    if (submember.semantics && submember.semantics.isEquipment) {
+                        processEquipment(submember);
+                    }
+                });
+            }
+        });
+
+        return items;
+    }
+
+    /**
+     * Gets all exhaust fan items in a location
+     * @param {Item} locationItem - The location item to search
+     * @returns {Array} Array of exhaust fan control points
+     */
+    static getExhaustFanItems(locationItem) {
+        const items = [];
+
+        const processEquipment = (equipment) => {
+            // Check if this is a fan equipment
+            if (equipment.tags.includes("Fan")) {
+                equipment.members.forEach(member => {
+                    // Get points that are tagged for power control
+                    if (member.semantics && member.semantics.isPoint && 
+                        member.tags.includes("Switch") && member.tags.includes("Power")) {
+                        items.push(member);
+                    }
+                });
+            }
+        };
+
+        // Only process direct members of the location
+        locationItem.members.forEach(member => {
+            if (member.semantics && member.semantics.isEquipment) {
+                processEquipment(member);
+            }
+        });
+
+        return items;
+    }
+
+    /**
+     * Gets all AV equipment items in a location based on type
+     * @param {Item} locationItem - The location item to search
+     * @param {string} equipmentType - The type of AV equipment ("Receiver", "Speaker", "Screen", "Player")
+     * @returns {Array} Array of matching control points
+     */
+    static getAVItems(locationItem, equipmentType) {
+        const items = [];
+
+        const processEquipment = (equipment) => {
+            // Check if this is the requested AV equipment type
+            if (equipment.tags.includes(equipmentType)) {
+                equipment.members.forEach(member => {
+                    if (member.semantics && member.semantics.isPoint) {
+                        // Handle different types of control points
+                        if ((member.tags.includes("Switch") && member.tags.includes("Power")) ||
+                            (member.tags.includes("Control") && member.tags.includes("Volume")) ||
+                            (member.tags.includes("Switch") && member.tags.includes("Mute")) ||
+                            (member.tags.includes("Control") && member.tags.includes("Media"))) {
+                            items.push(member);
+                        }
+                    }
+                });
+            }
+        };
+
+        // Only process direct members of the location
+        locationItem.members.forEach(member => {
+            if (member.semantics && member.semantics.isEquipment) {
+                processEquipment(member);
+            }
+        });
 
         return items;
     }
 }
 
 module.exports = {
-    LocationUtils : LocationUtils
-  };
+    LocationUtils: LocationUtils
+};
